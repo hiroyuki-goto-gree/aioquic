@@ -451,6 +451,7 @@ class QuicConnection:
         :param reason_phrase: A human-readable explanation of why the
                               connection is being closed.
         """
+        self._spin_bit = True
         if self._close_event is None and self._state not in END_STATES:
             self._close_event = events.ConnectionTerminated(
                 error_code=error_code,
@@ -953,20 +954,20 @@ class QuicConnection:
                 self._set_state(QuicConnectionState.CONNECTED)
 
             # update spin bit
-            if not header.is_long_header and packet_number > self._spin_highest_pn:
-                spin_bit = get_spin_bit(plain_header[0])
-                if self._is_client:
-                    self._spin_bit = not spin_bit
-                else:
-                    self._spin_bit = spin_bit
-                self._spin_highest_pn = packet_number
+            #if not header.is_long_header and packet_number > self._spin_highest_pn:
+            #    spin_bit = get_spin_bit(plain_header[0])
+            #    if self._is_client:
+            #        self._spin_bit = not spin_bit
+            #    else:
+            #        self._spin_bit = spin_bit
+            #    self._spin_highest_pn = packet_number
 
-                if self._quic_logger is not None:
-                    self._quic_logger.log_event(
-                        category="connectivity",
-                        event="spin_bit_updated",
-                        data={"state": self._spin_bit},
-                    )
+            #    if self._quic_logger is not None:
+            #        self._quic_logger.log_event(
+            #            category="connectivity",
+            #            event="spin_bit_updated",
+            #            data={"state": self._spin_bit},
+            #        )
 
             # handle payload
             context = QuicReceiveContext(
